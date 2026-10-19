@@ -56,6 +56,7 @@ def get_review(review_id: int, session: Session = Depends(get_session)):
     if not review:
         raise HTTPException(status_code=404, detail="No review")
 
+    return review
 
 
 @router.patch("/{review_id}", response_model=ReviewRead)

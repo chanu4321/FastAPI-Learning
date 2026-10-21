@@ -72,7 +72,7 @@ def update_review(review_id: int, update: ReviewUpdate, session: Session = Depen
 
     session.add(review)
     session.commit()
-    session.refresh()
+    session.refresh(review)
 
     return review
 

@@ -62,16 +62,24 @@ def avg_weight(
     exercise: str,
     session: Session = Depends(get_session)
 ):
-    avg_weight, total_count = session.exec(
-        select(func.avg(Workout.weight_kg),func.count(Workout.id).where(Workout.member_name == member).where(Workout.exercise == exercise))
-        ).first()
+    
+    member_exist = session.exec(
+        select(Workout).where(Workout.member_name == member)
+    ).first()
 
+    if not member_exist:
+        raise MemberNotFoundError(member)
+
+    avg_weight, total_count = session.exec(
+        select(func.avg(Workout.weight_kg),func.count(Workout.id)).where(Workout.member_name == member).where(Workout.exercise == exercise)  ## select ends before where
+        ).first()
+    
     if total_count == 0:
         raise HTTPException(status_code=404, detail=f"No log found of {exercise} for {member}")
 
     return {
         "member": member,
         "exercise": exercise,
-        "average weight" : round(avg_weight,2),
-        "total count" : total_count
+        "average_weight" : round(avg_weight,2),
+        "total_count" : total_count
     }

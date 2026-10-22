@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from models import Workout, WorkoutCreate, WorkoutRead, WorkoutUpdate
-from database import get_session, Session
-from sqlmodel import select
+from database import get_session
+from sqlmodel import select, Session, func
+from exceptions import MemberNotFoundError
 
 router = APIRouter(prefix="/workouts", tags=["Workout Log"])
 
@@ -21,10 +22,10 @@ def create_workout(
 @router.get("/", response_model=list[WorkoutRead])
 def list_workout(
     session: Session = Depends(get_session),
-    member_name: str = Query(default=None, description="Filter by member name"),
-    exercise: str = Query(default=None, description="Filter by exercise"),
+    member_name: str | None = Query(default=None, description="Filter by member name"),
+    exercise: str | None = Query(default=None, description="Filter by exercise"),
     skip: int = Query(default=0, ge=0),
-    limit: int = Query(default=5, gt=1, le=20, description="Max Workouts per page")
+    limit: int = Query(default=5, ge=1, le=20, description="Max Workouts per page")
 ):
 
     query = select(Workout)
@@ -52,3 +53,25 @@ def get_workout(
         raise HTTPException(status_code=404, detail="Workout details not found")
 
     return workout
+
+
+
+@router.get("/average/{member}/{exercise}")
+def avg_weight(
+    member: str,
+    exercise: str,
+    session: Session = Depends(get_session)
+):
+    avg_weight, total_count = session.exec(
+        select(func.avg(Workout.weight_kg),func.count(Workout.id).where(Workout.member_name == member).where(Workout.exercise == exercise))
+        ).first()
+
+    if total_count == 0:
+        raise HTTPException(status_code=404, detail=f"No log found of {exercise} for {member}")
+
+    return {
+        "member": member,
+        "exercise": exercise,
+        "average weight" : round(avg_weight,2),
+        "total count" : total_count
+    }

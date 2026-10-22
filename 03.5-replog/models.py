@@ -9,7 +9,7 @@ class Workout(SQLModel, table=True):
     exercise: str = Field(index=True)
     sets: int = Field(ge=0, le=5)
     reps: int = Field(ge=0)
-    weight_kg: float = Field(ge=0)
+    weight_kg: float = Field(default=0, ge=0)
     logged_at: datetime = Field(default_factory=lambda:datetime.now(timezone.utc))  ## use this now
 
 
@@ -18,7 +18,7 @@ class WorkoutCreate(SQLModel):
     exercise: str
     sets: int = Field(default=0, ge=0, le=5)
     reps: int = Field(ge=0)
-    weight_kg: Optional[float] = Field(default=0,ge=0)
+    weight_kg: float = Field(default=0,ge=0)
 
 class WorkoutRead(SQLModel):
     id: int

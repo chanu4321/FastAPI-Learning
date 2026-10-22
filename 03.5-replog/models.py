@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Workout(SQLModel, table=True):
@@ -10,15 +10,15 @@ class Workout(SQLModel, table=True):
     sets: int = Field(ge=0, le=5)
     reps: int = Field(ge=0)
     weight_kg: float = Field(ge=0)
-    logged_at: datetime = Field(default_factory=datetime.now)
+    logged_at: datetime = Field(default_factory=lambda:datetime.now(timezone.utc))  ## use this now
 
 
 class WorkoutCreate(SQLModel):
     member_name: str
     exercise: str
-    sets: int = Field(ge=0, le=5)
+    sets: int = Field(default=0, ge=0, le=5)
     reps: int = Field(ge=0)
-    weight_kg: float = Field(ge=0)
+    weight_kg: Optional[float] = Field(default=0,ge=0)
 
 class WorkoutRead(SQLModel):
     id: int

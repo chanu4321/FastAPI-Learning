@@ -50,3 +50,5 @@ def get_workout(
 
     if not workout:
         raise HTTPException(status_code=404, detail="Workout details not found")
+
+    return workout

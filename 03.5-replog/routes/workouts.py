@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from models import Workout, WorkoutCreate, WorkoutRead, WorkoutUpdate
 from database import get_session
 from sqlmodel import select, Session, func
-from exceptions import MemberNotFoundError
+from exceptions import MemberNotFoundError, WorkoutNotFoundError
 
 router = APIRouter(prefix="/workouts", tags=["Workout Log"])
 
@@ -50,14 +50,14 @@ def get_workout(
     workout = session.get(Workout, workout_id)
 
     if not workout:
-        raise HTTPException(status_code=404, detail="Workout details not found")
+        raise WorkoutNotFoundError(workout)
 
     return workout
 
 
 
 @router.get("/average/{member}/{exercise}")
-def avg_weight(
+def get_average(
     member: str,
     exercise: str,
     session: Session = Depends(get_session)
@@ -83,3 +83,44 @@ def avg_weight(
         "average_weight" : round(avg_weight,2),
         "total_count" : total_count
     }
+
+
+
+@router.patch("/{workout_id}",response_model=WorkoutRead)
+def update_workout(
+    workout_id: int,
+    update: WorkoutUpdate,
+    session: Session = Depends(get_session)
+):
+    workout = session.get(Workout,workout_id)
+
+    if not workout:
+        raise WorkoutNotFoundError(workout)
+
+    db_update = update.model_dump(exclude_unset=True)
+
+    for key, value in db_update:
+        setattr(workout, key, value)
+
+    session.add(workout)
+    session.commit()
+    session.refresh(workout)
+
+    return workout
+
+
+
+@router.delete("/{workout_id}")
+def del_workout(
+    workout_id: int,
+    session: Session = Depends(get_session)
+):
+    workout = session.get(Workout, workout_id)
+
+    if not workout:
+        raise WorkoutNotFoundError(workout)
+    
+    session.delete(workout)
+    session.commit()
+
+    return {"message": "Workout deleted"}

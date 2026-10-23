@@ -50,7 +50,7 @@ def get_workout(
     workout = session.get(Workout, workout_id)
 
     if not workout:
-        raise WorkoutNotFoundError(workout)
+        raise WorkoutNotFoundError(workout_id)
 
     return workout
 
@@ -95,11 +95,11 @@ def update_workout(
     workout = session.get(Workout,workout_id)
 
     if not workout:
-        raise WorkoutNotFoundError(workout)
+        raise WorkoutNotFoundError(workout_id)
 
     db_update = update.model_dump(exclude_unset=True)
 
-    for key, value in db_update:
+    for key, value in db_update.items():
         setattr(workout, key, value)
 
     session.add(workout)
@@ -118,7 +118,7 @@ def del_workout(
     workout = session.get(Workout, workout_id)
 
     if not workout:
-        raise WorkoutNotFoundError(workout)
+        raise WorkoutNotFoundError(workout_id)
     
     session.delete(workout)
     session.commit()

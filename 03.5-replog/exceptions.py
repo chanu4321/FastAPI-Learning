@@ -1,6 +1,5 @@
 from fastapi.responses import JSONResponse
 from fastapi import Request
-from models import Workout
 
 
 class MemberNotFoundError(Exception):
@@ -9,8 +8,8 @@ class MemberNotFoundError(Exception):
 
 
 class WorkoutNotFoundError(Exception):
-    def __init__(self, workout: Workout):
-        self.workout = workout
+    def __init__(self, id: int):
+        self.id = id
 
 
 async def member_not_found_handler(request: Request, exc: MemberNotFoundError):
@@ -28,7 +27,7 @@ async def workout_not_found_handler(request: Request, exc: WorkoutNotFoundError)
         status_code=404,
         content={
             "error": "Workout not found",
-            "message": f"No Workout with given details",
-            "workout": exc.workout
+            "message": f"No Workout with id: {exc.id}",
+            "workout": exc.id
         }
     )

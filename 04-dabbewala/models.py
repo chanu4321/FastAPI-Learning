@@ -1,7 +1,7 @@
 from enum import Enum
 from sqlmodel import SQLModel, Field
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 # OrderStatus (Enum) -> preparing, picked_up, in_transit, delivered
 class OrderStatus(str, Enum):
@@ -17,8 +17,8 @@ class Order(SQLModel, table=True):
     delivery_address: str
     items: str
     status: OrderStatus = Field(default=OrderStatus.PREPARING)
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # Schema for creating a new order
 class OrderCreate(SQLModel):

@@ -3,7 +3,7 @@ from sqlmodel import SQLModel, create_engine, Session
 
 DATABASE_URL = "sqlite:///dabbewala.db"
 
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL)
 
 def create_tables():
     SQLModel.metadata.create_all(engine)
